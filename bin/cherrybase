@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'git' 
+
+git = Cherrybase::Git.new
+
+puts git.last_svn_commit

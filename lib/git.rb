@@ -4,6 +4,10 @@ module Cherrybase
       @cmd = cmd
     end
     
+    def cherry_pick(commit_hash)
+      @cmd.run("git cherry-pick #{commit_hash}")
+    end
+    
     def has_conflicts?()
       @cmd.run("git ls-files -tu").length > 0
     end

@@ -7,6 +7,12 @@ describe Cherrybase::Git do
     @git = Cherrybase::Git.new(@cmd)
   end
   
+  it "should cherry-pick the given commit hash" do
+    commit_hash = "commit hash"
+    @cmd.should_receive(:run).with("git cherry-pick #{commit_hash}")
+    @git.cherry_pick(commit_hash)
+  end
+  
   it "should return false if no files are marked as unmerged" do
     @cmd.should_receive(:run).with("git ls-files -tu").and_return([])
     

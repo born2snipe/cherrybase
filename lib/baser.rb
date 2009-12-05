@@ -5,7 +5,7 @@ module Cherrybase
   class Baser
     attr_reader :last_svn_commit, :commits_to_cherrypick, :next_cherrypick
     
-    def initialize(git = Cherrybase::Git.new, file_util = nil)
+    def initialize(git = Cherrybase::Git.new, file_util = Cherrybase::FileUtil.new)
       @git = git
       @file_util = file_util
     end

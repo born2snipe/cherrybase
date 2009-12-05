@@ -2,17 +2,21 @@ module Cherrybase
   DEBUG = false
   
   class Cmd
-    def run(command)
+    def run(command, show_lines)
       if DEBUG
         puts "[Cmd::run] #{command}"
       end
       lines = IO.popen(command).readlines
-      if DEBUG
+      if DEBUG || show_lines
         lines.each do |line|
-          puts "[Cmd::result] #{line}"
+          puts line
         end
       end
       lines
+    end
+    
+    def run(command)
+      run(command, false)
     end
   end
 end

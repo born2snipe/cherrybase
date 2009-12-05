@@ -4,6 +4,18 @@ module Cherrybase
       @cmd = cmd
     end
     
+    def has_conflicts?()
+      @cmd.run("git ls-files -tu").length > 0
+    end
+    
+    def commit(commit_hash)
+      @cmd.run("git commit -C #{commit_hash}")
+    end
+    
+    def status()
+      @cmd.run("git status", true)
+    end
+    
     def commits_to_cherrypick()
       commits = []
       last_svn_commit = last_svn_commit()

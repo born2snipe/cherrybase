@@ -22,18 +22,31 @@ module Cherrybase
       @cmd.run("git status", true)
     end
     
-    def commits_to_cherrypick()
+    def commits_to_cherrypick(first_commit = nil, last_commit = nil)
       commits = []
-      last_svn_commit = last_svn_commit()
       @cmd.run("git log --pretty=oneline").each do |line|
         commit_hash = line.split(' ')[0]
-        if last_svn_commit == commit_hash
+        if commit_hash.include?(first_commit)
+          commits << commit_hash
           break
         else
           commits << commit_hash
         end
-      end        
-      commits.reverse
+      end
+      
+      if last_commit
+        remove_commits = []
+        commits.each do |commit|
+          if  commit.include?(last_commit)
+             break
+          else
+             remove_commits << commit
+          end
+      end
+      commits = commits - remove_commits
+     end
+     
+     commits.reverse
     end
     
     def last_svn_commit()

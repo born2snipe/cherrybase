@@ -50,7 +50,7 @@ describe Cherrybase::Git do
     
     @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("3", "2").should == ["hash3", "hash2"]
+    @git.commits_to_cherrypick("3", true, "2").should == ["hash3", "hash2"]
   end
   
   it "should grab all commit hashes after the commit and the last commit given" do
@@ -58,7 +58,7 @@ describe Cherrybase::Git do
     
     @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("hash3", "hash2").should == ["hash3", "hash2"]
+    @git.commits_to_cherrypick("hash3", true, "hash2").should == ["hash3", "hash2"]
   end
   
   it "should grab all commit hashes after the commit and the commit given" do
@@ -67,6 +67,14 @@ describe Cherrybase::Git do
     @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
     
     @git.commits_to_cherrypick("hash2").should == ["hash2", "hash1"]
+  end
+  
+  it "should grab all commit hashes after the commit, but do not include the commit given" do
+    pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3"]
+    
+    @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
+    
+    @git.commits_to_cherrypick("hash2", false).should == ["hash1"]
   end
   
   it "should grab all commit hashes after the commit and can be a partial match" do

@@ -22,12 +22,12 @@ module Cherrybase
       @cmd.run("git status", true)
     end
     
-    def commits_to_cherrypick(first_commit = nil, last_commit = nil)
+    def commits_to_cherrypick(first_commit = nil, include_first_commit = true, last_commit = nil)
       commits = []
       @cmd.run("git log --pretty=oneline").each do |line|
         commit_hash = line.split(' ')[0]
         if commit_hash.include?(first_commit)
-          commits << commit_hash
+          commits << commit_hash if include_first_commit
           break
         else
           commits << commit_hash

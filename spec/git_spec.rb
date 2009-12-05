@@ -57,18 +57,24 @@ describe Cherrybase::Git do
       "Author: author-2",
       "Date: date-2",
       "",
-      "comment-2",
+      " comment-2",
+      "",
+      "commit hash3",
+      "Author: author-3",
+      "Date: date-3",
+      "",
+      "comment-3",
       "",
       " git-svn-id: url",
       ""
     ]
     
-    pretty_log_lines = ["hash1 comment-1", "hash2 comment-2"]
+    pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3"]
     
     @cmd.should_receive(:run).with("git log").and_return(log_lines)
     @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick().should == ["hash1"]
+    @git.commits_to_cherrypick().should == ["hash2", "hash1"]
   end
   
   it "should return nil if no svn commit was found" do

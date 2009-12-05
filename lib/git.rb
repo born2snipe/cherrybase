@@ -1,6 +1,8 @@
+require 'cmd'
+
 module Cherrybase
   class Git
-    def initialize(cmd)
+    def initialize(cmd = Cherrybase::Cmd.new)
       @cmd = cmd
     end
     
@@ -31,7 +33,7 @@ module Cherrybase
           commits << commit_hash
         end
       end        
-      commits
+      commits.reverse
     end
     
     def last_svn_commit()

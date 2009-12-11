@@ -2,7 +2,7 @@ module Cherrybase
   DEBUG = false
   
   class Cmd
-    def run(command, show_lines)
+    def run(command = '', show_lines = false)
       if DEBUG
         puts "[Cmd::run] #{command}"
       end
@@ -13,10 +13,6 @@ module Cherrybase
         end
       end
       lines
-    end
-    
-    def run(command)
-      run(command, false)
     end
   end
 end

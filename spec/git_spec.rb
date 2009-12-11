@@ -7,6 +7,21 @@ describe Cherrybase::Git do
     @git = Cherrybase::Git.new(@cmd)
   end
   
+  it "should return the current branch name" do
+    @cmd.should_receive(:run).with("git branch").and_return(["branch1", "* branch2"])
+    @git.current_branch().should == "branch2"
+  end
+  
+  it "should return false if the branch does not exist" do
+    @cmd.should_receive(:run).with("git branch").and_return(["branch1", "branch2"])
+    @git.has_branch?("doesNotExist").should == false
+  end
+  
+  it "should return true if the branch exists" do
+    @cmd.should_receive(:run).with("git branch").and_return([" branch1", " branch2"])
+    @git.has_branch?("branch2").should == true
+  end
+  
   it "should cherry-pick the given commit hash" do
     commit_hash = "commit hash"
     @cmd.should_receive(:run).with("git cherry-pick #{commit_hash}")

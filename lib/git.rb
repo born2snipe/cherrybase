@@ -22,6 +22,24 @@ module Cherrybase
       @cmd.run("git status", true)
     end
     
+    def current_branch()
+      @cmd.run("git branch").each do |line|
+        if line.index('*')
+          return line.gsub(/\*(.+)/, '\1').strip
+        end
+      end
+      nil
+    end
+    
+    def has_branch?(branch_name)
+      @cmd.run("git branch").each do |line|
+        if line.strip == branch_name
+          return true
+        end
+      end
+      false
+    end
+    
     def commits_to_cherrypick(first_commit = nil, include_first_commit = true, last_commit = nil)
       commits = []
       @cmd.run("git log --pretty=oneline").each do |line|

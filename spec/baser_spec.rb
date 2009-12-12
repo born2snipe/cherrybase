@@ -133,7 +133,7 @@ describe Cherrybase::Baser do
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
     @git.should_receive(:last_commit).with(BRANCH).and_return('last-commit')
     @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
-    @git.should_receive(:commits_to_cherrypick).with('starting-commit', 'last-commit').and_return(['commits-to-cherrypick'])
+    @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'starting-commit', 'last-commit').and_return(['commits-to-cherrypick'])
     @file_util.should_receive(:write_temp_file).with('starting-commit', 'starting-commit', ['commits-to-cherrypick'])
     @baser.init(BRANCH, 'starting-commit', nil)
   end

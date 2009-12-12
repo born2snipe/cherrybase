@@ -16,8 +16,9 @@ module Cherrybase
       raise "Could not locate START hash (#{starting_commit}) in the Git repository history" if !@git.has_commit?(branch_name, starting_commit)
       raise "Could not locate END hash (#{ending_commit}) in the Git repository history" if ending_commit != nil && !@git.has_commit?(branch_name, ending_commit)      
       
+      # TODO - need to acknowlege teh ending_commit
       last_commit = @git.last_commit(branch_name)
-      commits = @git.commits_to_cherrypick(starting_commit, last_commit)
+      commits = @git.commits_to_cherrypick(branch_name, starting_commit, last_commit)
       @file_util.write_temp_file(starting_commit, starting_commit, commits)
     end
     
@@ -37,6 +38,7 @@ module Cherrybase
       i = commits.index(next_cherrypick)
       
       while i < commits.length
+        print "Applying #{i+1} of #{commits.length} cherry-picks\r" 
         last_commit_applied = commits[i]
         @git.cherry_pick(last_commit_applied)
         if @git.has_conflicts?
@@ -45,8 +47,10 @@ module Cherrybase
         end
         i += 1
       end
+      print "\n"
       
       if conflicts_found
+        puts "Conflict(s) Encountered!"
         @git.status
         if (last_commit_applied == commits.last)
           @file_util.delete_temp_file()
@@ -56,7 +60,7 @@ module Cherrybase
       else
         @file_util.delete_temp_file()
       end
-      
+      puts "Cherrybase completed!"
     end
     
     def abort()

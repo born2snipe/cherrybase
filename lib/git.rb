@@ -8,12 +8,16 @@ module Cherrybase
     
     def has_commit?(branch_name, commit_hash)
       raise "Please supply at least 5 characters for a commit hash" if commit_hash.length < 5
+      resolve_commit(branch_name, commit_hash) != nil
+    end
+    
+    def resolve_commit(branch_name, commit_hash)
       @cmd.run("git log #{branch_name} --pretty=oneline").each do |line|
         if line == commit_hash || line.include?(commit_hash)
-          return true
+          return line.split(' ')[0]
         end
       end
-      false
+      nil
     end
     
     def last_commit(branch_name)
@@ -59,9 +63,9 @@ module Cherrybase
       false
     end
     
-    def commits_to_cherrypick(first_commit = nil, include_first_commit = true, last_commit = nil)
+    def commits_to_cherrypick(branch_name, first_commit = nil, include_first_commit = true, last_commit = nil)
       commits = []
-      @cmd.run("git log --pretty=oneline").each do |line|
+      @cmd.run("git log #{branch_name} --pretty=oneline").each do |line|
         commit_hash = line.split(' ')[0]
         if commit_hash.include?(first_commit)
           commits << commit_hash if include_first_commit

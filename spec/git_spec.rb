@@ -95,41 +95,41 @@ describe Cherrybase::Git do
   it "should grab all commit hashes after the commit and the last commit given with a partial match" do
     pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3", "hash4 commit-4"]
     
-    @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("3", true, "2").should == ["hash3", "hash2"]
+    @git.commits_to_cherrypick("branch", "3", true, "2").should == ["hash3", "hash2"]
   end
   
   it "should grab all commit hashes after the commit and the last commit given" do
     pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3", "hash4 commit-4"]
     
-    @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("hash3", true, "hash2").should == ["hash3", "hash2"]
+    @git.commits_to_cherrypick("branch", "hash3", true, "hash2").should == ["hash3", "hash2"]
   end
   
   it "should grab all commit hashes after the commit and the commit given" do
     pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3"]
     
-    @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("hash2").should == ["hash2", "hash1"]
+    @git.commits_to_cherrypick("branch", "hash2").should == ["hash2", "hash1"]
   end
   
   it "should grab all commit hashes after the commit, but do not include the commit given" do
     pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3"]
     
-    @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("hash2", false).should == ["hash1"]
+    @git.commits_to_cherrypick("branch", "hash2", false).should == ["hash1"]
   end
   
   it "should grab all commit hashes after the commit and can be a partial match" do
     pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3"]
     
-    @cmd.should_receive(:run).with("git log --pretty=oneline").and_return(pretty_log_lines)
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(pretty_log_lines)
     
-    @git.commits_to_cherrypick("2").should == ["hash2", "hash1"]
+    @git.commits_to_cherrypick("branch", "2").should == ["hash2", "hash1"]
   end
   
   it "should return nil if no svn commit was found" do

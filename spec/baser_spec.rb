@@ -9,6 +9,14 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should raise an error if you try to abort while not in a cherrybase" do
+    @file_util.should_receive(:temp_file?).and_return(false)
+    
+    lambda {
+      @baser.abort
+    }.should raise_error(RuntimeError, "It appears you are not in the middle of a cherrybase!?")
+  end
+  
   it "should use the end commit if given" do
     @file_util.should_receive(:git_repo?).and_return(true)
     @file_util.should_receive(:temp_file?).and_return(false)
@@ -18,7 +26,9 @@ describe Cherrybase::Baser do
     @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'first_commit', 'last_commit').and_return(['commits-to-cherrypick'])
     @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return("first_commit")
     @git.stub!(:resolve_commit).with(BRANCH, "end-commit").and_return("last_commit")
-    @file_util.should_receive(:write_temp_file).with('first_commit', 'first_commit', ['commits-to-cherrypick'])
+    @file_util.should_receive(:write_temp_file).with('last_original_commit', 'first_commit', ['commits-to-cherrypick'])
+    @git.stub!(:current_branch).and_return("current")
+    @git.stub!(:last_commit).with("current").and_return("last_original_commit")
     
     @baser.init(BRANCH, 'starting-commit', "end-commit")
   end
@@ -149,7 +159,9 @@ describe Cherrybase::Baser do
     @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
     @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'first_commit', 'last-commit').and_return(['commits-to-cherrypick'])
     @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return("first_commit")
-    @file_util.should_receive(:write_temp_file).with('first_commit', 'first_commit', ['commits-to-cherrypick'])
+    @git.stub!(:current_branch).and_return("current")
+    @git.stub!(:last_commit).with("current").and_return("last_original_commit")
+    @file_util.should_receive(:write_temp_file).with('last_original_commit', 'first_commit', ['commits-to-cherrypick'])
     @baser.init(BRANCH, 'starting-commit', nil)
   end
   

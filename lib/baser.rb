@@ -69,6 +69,9 @@ module Cherrybase
     
     def abort()
       raise "It appears you are not in the middle of a cherrybase!?" if !@file_util.temp_file?
+      temp_data = @file_util.read_temp_file()
+      @git.reset(temp_data['starting_commit'])
+      @file_util.delete_temp_file()
     end
     
   end

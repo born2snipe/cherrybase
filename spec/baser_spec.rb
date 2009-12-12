@@ -9,6 +9,15 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should reset HEAD back to the last original commit before any cherry-picks" do
+    @file_util.stub!(:temp_file?).and_return(true)
+    @file_util.stub!(:read_temp_file).and_return({"starting_commit" => "start"})
+    @file_util.should_receive(:delete_temp_file)
+    @git.should_receive(:reset).with("start")
+    
+    @baser.abort
+  end
+  
   it "should raise an error if you try to abort while not in a cherrybase" do
     @file_util.should_receive(:temp_file?).and_return(false)
     

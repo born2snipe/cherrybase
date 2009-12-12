@@ -6,6 +6,10 @@ module Cherrybase
       @cmd = cmd
     end
     
+    def reset(commit_hash)
+      @cmd.run("git reset --hard #{commit_hash}")
+    end
+    
     def has_commit?(branch_name, commit_hash)
       resolve_commit(branch_name, commit_hash) != nil
     end

@@ -7,6 +7,12 @@ describe Cherrybase::Git do
     @git = Cherrybase::Git.new(@cmd)
   end
   
+  it "should reset the HEAD to the given commit" do
+    @cmd.should_receive(:run).with("git reset --hard commit")
+    
+    @git.reset("commit")
+  end
+  
   it "should raise an error if the commit hash given is not at least 5 characters" do
     lambda {
       @git.has_commit?("branch", "1234")

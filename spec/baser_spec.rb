@@ -9,6 +9,27 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should raise an error if the end commit could not be located in the history" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @git.should_receive(:has_commit?).with(BRANCH, "start").and_return(true)
+    @git.should_receive(:has_commit?).with(BRANCH, "end").and_return(false)
+    lambda {
+      @baser.init(BRANCH, "start", "end")
+    }.should raise_error(RuntimeError, "Could not locate END hash (end) in the Git repository history")
+  end
+  
+  it "should raise an error if the start commit could not be located in the history" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    lambda {
+      @git.should_receive(:has_commit?).with(BRANCH, "doesNotExist").and_return(false)
+      @baser.init(BRANCH, "doesNotExist", nil)
+    }.should raise_error(RuntimeError, "Could not locate START hash (doesNotExist) in the Git repository history")
+  end
+  
   it "should commit staged merge resolution" do
     @file_util.should_receive(:temp_file?).and_return(true)
     @file_util.should_receive(:read_temp_file).and_return({
@@ -111,6 +132,7 @@ describe Cherrybase::Baser do
     @file_util.should_receive(:temp_file?).and_return(false)
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
     @git.should_receive(:last_commit).with(BRANCH).and_return('last-commit')
+    @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
     @git.should_receive(:commits_to_cherrypick).with('starting-commit', 'last-commit').and_return(['commits-to-cherrypick'])
     @file_util.should_receive(:write_temp_file).with('starting-commit', 'starting-commit', ['commits-to-cherrypick'])
     @baser.init(BRANCH, 'starting-commit', nil)

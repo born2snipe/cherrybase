@@ -7,6 +7,27 @@ describe Cherrybase::Git do
     @git = Cherrybase::Git.new(@cmd)
   end
   
+  it "should raise an error if the commit hash given is not at least 5 characters" do
+    lambda {
+      @git.has_commit?("branch", "1234")
+    }.should raise_error(RuntimeError, "Please supply at least 5 characters for a commit hash")
+  end
+  
+  it "should return true if a partial match is found for the given hash" do
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(["commit1", "commit2-hash", "commit3"])
+    @git.has_commit?("branch", "-hash").should == true
+  end
+  
+  it "should return true if an exact match is found for the given hash" do
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(["commit"])
+    @git.has_commit?("branch", "commit").should == true
+  end
+  
+  it "should return false if a hash could not be found in the history of the given branch" do
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return([])
+    @git.has_commit?("branch", "commit").should == false
+  end
+  
   it "should return nil if there is no commit history" do
     @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return([])
     @git.last_commit('branch').should == nil

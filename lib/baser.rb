@@ -13,6 +13,8 @@ module Cherrybase
       raise "Could not locate .git folder! Is this a Git repository?" if !@file_util.git_repo?
       raise "Could not find branch (#{branch_name}) in the Git repository" if !@git.has_branch?(branch_name)
       raise "It appears you are already in the middle of a cherrybase!?" if @file_util.temp_file?
+      raise "Could not locate START hash (#{starting_commit}) in the Git repository history" if !@git.has_commit?(branch_name, starting_commit)
+      raise "Could not locate END hash (#{ending_commit}) in the Git repository history" if ending_commit != nil && !@git.has_commit?(branch_name, ending_commit)      
       
       last_commit = @git.last_commit(branch_name)
       commits = @git.commits_to_cherrypick(starting_commit, last_commit)

@@ -69,12 +69,12 @@ module Cherrybase
       false
     end
     
-    def commits_to_cherrypick(branch_name, first_commit = nil, include_first_commit = true, last_commit = nil)
+    def commits_to_cherrypick(branch_name, first_commit = nil, last_commit = nil)
       commits = []
       @cmd.run("git log #{branch_name} --pretty=oneline").each do |line|
         commit_hash = line.split(' ')[0]
-        if commit_hash.include?(first_commit)
-          commits << commit_hash if include_first_commit
+        if commit_hash == first_commit
+          commits << commit_hash
           break
         else
           commits << commit_hash
@@ -84,7 +84,7 @@ module Cherrybase
       if last_commit
         remove_commits = []
         commits.each do |commit|
-          if  commit.include?(last_commit)
+          if  commit == last_commit
              break
           else
              remove_commits << commit

@@ -5,8 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "cherrybase"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Ruby gem to cherry-pick a range of commits with similar rebase options}
+    gem.description = %Q{Ruby gem to cherry-pick a range of commits with similar rebase options}
     gem.email = "born2snipe@gmail.com"
     gem.homepage = "http://github.com/born2snipe/cherrybase"
     gem.authors = ["born2snipe"]

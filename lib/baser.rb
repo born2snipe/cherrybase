@@ -22,6 +22,7 @@ module Cherrybase
       else
         last_commit = @git.last_commit(branch_name)
       end
+      
       commits = @git.commits_to_cherrypick(branch_name, first_commit, last_commit)
       @file_util.write_temp_file(@git.last_commit(@git.current_branch), first_commit, commits)
     end
@@ -42,7 +43,7 @@ module Cherrybase
       i = commits.index(next_cherrypick)
       
       while i < commits.length
-        print "Applying #{i+1} of #{commits.length} cherry-picks\r" 
+        puts "Applying #{i+1} of #{commits.length} cherry-picks\r" 
         last_commit_applied = commits[i]
         @git.cherry_pick(last_commit_applied)
         if @git.has_conflicts?
@@ -51,7 +52,6 @@ module Cherrybase
         end
         i += 1
       end
-      print "\n"
       
       if conflicts_found
         puts "Conflict(s) Encountered!"

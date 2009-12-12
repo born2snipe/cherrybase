@@ -7,14 +7,16 @@ module Cherrybase
     end
     
     def has_commit?(branch_name, commit_hash)
-      raise "Please supply at least 5 characters for a commit hash" if commit_hash.length < 5
       resolve_commit(branch_name, commit_hash) != nil
     end
     
     def resolve_commit(branch_name, commit_hash)
-      @cmd.run("git log #{branch_name} --pretty=oneline").each do |line|
-        if line == commit_hash || line.include?(commit_hash)
-          return line.split(' ')[0]
+      if commit_hash
+        raise "Please supply at least 5 characters for a commit hash" if commit_hash.length < 5
+        @cmd.run("git log #{branch_name} --pretty=oneline").each do |line|
+          if line == commit_hash || line.include?(commit_hash)
+            return line.split(' ')[0]
+          end
         end
       end
       nil

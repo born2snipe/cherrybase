@@ -18,7 +18,11 @@ module Cherrybase
       
       # TODO - need to acknowlege teh ending_commit
       first_commit = @git.resolve_commit(branch_name, starting_commit)
-      last_commit = @git.last_commit(branch_name)
+      if (ending_commit)
+        last_commit = @git.resolve_commit(branch_name, ending_commit)
+      else
+        last_commit = @git.last_commit(branch_name)
+      end
       commits = @git.commits_to_cherrypick(branch_name, first_commit, last_commit)
       @file_util.write_temp_file(first_commit, first_commit, commits)
     end

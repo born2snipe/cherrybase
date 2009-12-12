@@ -9,6 +9,20 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should use the end commit if given" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
+    @git.should_receive(:has_commit?).with(BRANCH, 'end-commit').and_return(true)
+    @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'first_commit', 'last_commit').and_return(['commits-to-cherrypick'])
+    @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return("first_commit")
+    @git.stub!(:resolve_commit).with(BRANCH, "end-commit").and_return("last_commit")
+    @file_util.should_receive(:write_temp_file).with('first_commit', 'first_commit', ['commits-to-cherrypick'])
+    
+    @baser.init(BRANCH, 'starting-commit', "end-commit")
+  end
+  
   it "should raise an error if the end commit could not be located in the history" do
     @file_util.should_receive(:git_repo?).and_return(true)
     @file_util.should_receive(:temp_file?).and_return(false)

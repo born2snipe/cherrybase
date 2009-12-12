@@ -6,6 +6,15 @@ module Cherrybase
       @cmd = cmd
     end
     
+    def last_commit(branch_name)
+      lines = @cmd.run("git log #{branch_name} --pretty=oneline")
+      if (lines.length > 0)
+        lines[0].split(' ')[0]
+      else
+        nil
+      end
+    end
+    
     def cherry_pick(commit_hash)
       @cmd.run("git cherry-pick #{commit_hash}")
     end

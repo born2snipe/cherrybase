@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Cherrybase::Baser do
+  BRANCH = 'branch-name'
   
   before(:each) do
     @git = mock("git")
@@ -8,48 +9,38 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should create the cherrybase temp file with the given branch's last commit" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @git.should_receive(:last_commit).with(BRANCH).and_return('last-commit')
+    @git.should_receive(:commits_to_cherrypick).with('starting-commit', 'last-commit').and_return(['commits-to-cherrypick'])
+    @file_util.should_receive(:write_temp_file).with('starting-commit', 'starting-commit', ['commits-to-cherrypick'])
+    @baser.init(BRANCH, 'starting-commit', nil)
+  end
+  
+  it "should throw an error if the given branch name does not exist in the repository" do
+    lambda {
+      @file_util.should_receive(:git_repo?).and_return(true)
+      @git.should_receive(:has_branch?).with(BRANCH).and_return(false)
+      @baser.init(BRANCH, nil, nil)
+    }.should raise_error(RuntimeError, "Could not find branch (branch-name) in the Git repository")
+  end
+  
   it "should throw an exception if the git repo folder could not be discovered" do
     lambda {
       @file_util.should_receive(:git_repo?).and_return(false)
-      @baser.init()
+      @baser.init(nil, nil, nil)
     }.should raise_error(RuntimeError, "Could not locate .git folder! Is this a Git repository?")
   end
   
-  it "should load the temp file if it exists already" do
-    filename = File.expand_path('.')
-    
+  it "should throw an error if you already in the middle of a cherrybase" do
     @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:git_root_dir).and_return(filename)
-    @file_util.should_receive(:temp_file).with(filename).and_return({
-      "last_svn_commit" => "last_svn_commit",
-      "commits_to_cherrypick" => ["commit1", "commit2"],
-      "next_cherrypick" => "commit3"
-    })
-    
-    @baser.init()
-    
-    @baser.last_svn_commit.should == "last_svn_commit"
-    @baser.commits_to_cherrypick.should == ["commit1", "commit2"]
-    @baser.next_cherrypick.should == "commit3"
-  end
-  
-  it "should create the temp file with all the commits to be cherry picked and the last svn commit" do
-    commits = ["commit1", "commit2"]
-    filename = File.expand_path('.')
-    
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:git_root_dir).and_return(filename)
-    @file_util.should_receive(:temp_file).with(filename).and_return(nil)
-    @file_util.should_receive(:write_temp_file).with(filename, "last_svn_commit", "commit1", commits)
-    
-    @git.should_receive(:last_svn_commit).and_return("last_svn_commit")
-    @git.should_receive(:commits_to_cherrypick).and_return(commits)
-    
-    @baser.init()
-    
-    @baser.last_svn_commit.should == "last_svn_commit"
-    @baser.commits_to_cherrypick.should == ["commit1", "commit2"]
-    @baser.next_cherrypick.should == "commit1"
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    lambda {
+      @file_util.should_receive(:temp_file?).and_return(true)
+      @baser.init("branch-name", nil, nil)
+    }.should raise_error(RuntimeError, "It appears you are already in the middle of a cherrybase!?")
   end
   
 end

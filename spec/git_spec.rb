@@ -7,6 +7,17 @@ describe Cherrybase::Git do
     @git = Cherrybase::Git.new(@cmd)
   end
   
+  it "should return nil if there is no commit history" do
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return([])
+    @git.last_commit('branch').should == nil
+  end
+  
+  it "should return the last commit of the given branch" do
+    pretty_log_lines = ["hash1 comment-1", "hash2 comment-2", "hash3 comment-3"]
+    @cmd.should_receive(:run).with("git log branch --pretty=oneline").and_return(pretty_log_lines)
+    @git.last_commit('branch').should == 'hash1'
+  end
+  
   it "should return the current branch name" do
     @cmd.should_receive(:run).with("git branch").and_return(["branch1", "* branch2"])
     @git.current_branch().should == "branch2"

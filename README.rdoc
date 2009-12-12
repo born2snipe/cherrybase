@@ -2,6 +2,22 @@
 
 Git cherry-pick a range of commits from a another branch into your current branch
 
-== Normal Cherrypickn' Workflow
+== Example usages:
+This will attempt to cherry-pick from the <first-commit> all the way to the very last commit of the <branch>.
 
+	cherrybase <branch> <first-commit>
+	
+This will attempt to cherry-pick from the <first-commit> all the way to <last-commit> from the <branch>.
 
+	cherrybase <branch> <first-commit>..<last-commit>
+	
+
+If you encounter a merge conflict you should be able to handle this similar to how you would a 'git rebase'. You make the changes as needed and stage the changes for commit. You now have two choices just like with rebasing '--continue' or '--abort'.
+
+This will commit your changes using the authorship of the original commit. Then attempt to proceed with the cherry-picking.
+
+	cherrybase --continue
+
+This will reset your HEAD back to the original commit just before you started cherrybasing.
+
+	cherrybase --abort

@@ -9,6 +9,103 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should commit staged merge resolution" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => "commit1",
+      "commits" => ["start", "commit1"]
+    })
+    @git.should_receive(:commit).with("start")
+    @git.should_receive(:cherry_pick).with("commit1")
+    @git.should_receive(:has_conflicts?).and_return(false)
+    @file_util.should_receive(:delete_temp_file)
+    
+    @baser.continue(true)
+  end
+  
+  it "should start apply commits based on the next_cherrypick" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => "commit1",
+      "commits" => ["start", "commit1"]
+    })
+    @git.should_receive(:cherry_pick).with("commit1")
+    @git.should_receive(:has_conflicts?).and_return(false)
+    @file_util.should_receive(:delete_temp_file)
+    
+    @baser.continue
+  end
+  
+  it "should cleanup the temp file if a conflict is encountered on the last commit" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => "start",
+      "commits" => ["start"]
+    })
+    @git.should_receive(:cherry_pick).with("start")
+    @git.should_receive(:has_conflicts?).and_return(true)
+    @git.should_receive(:status)
+    @file_util.should_receive(:delete_temp_file)
+    
+    @baser.continue
+  end
+  
+  it "should stop cherrypicking if a conflict is found" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => "start",
+      "commits" => ["start", "end"]
+    })
+    @git.should_receive(:cherry_pick).with("start")
+    @git.should_receive(:has_conflicts?).and_return(true)
+    @git.should_receive(:status)
+    @file_util.should_receive(:write_temp_file).with("start", "end", ["start", "end"])
+    
+    @baser.continue
+  end
+  
+
+  it "should attempt to cherry-pick all the commits left (two commits)" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => "start",
+      "commits" => ["start", "end"]
+    })
+    @git.should_receive(:cherry_pick).with("start")
+    @git.should_receive(:cherry_pick).with("end")
+    @git.should_receive(:has_conflicts?).and_return(false)
+    @git.should_receive(:has_conflicts?).and_return(false)
+    @file_util.should_receive(:delete_temp_file)
+    
+    @baser.continue
+  end
+  
+  it "should attempt to cherry-pick all the commits left (one commit)" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => "start",
+      "commits" => ["start"]
+    })
+    @git.should_receive(:cherry_pick).with("start")
+    @git.should_receive(:has_conflicts?).and_return(false)
+    @file_util.should_receive(:delete_temp_file)
+    
+    @baser.continue
+  end
+  
+  it "should throw an error if you are not in the middle of a cherrybase" do
+    @file_util.should_receive(:temp_file?).and_return(false)
+    lambda {
+      @baser.continue
+    }.should raise_error(RuntimeError, "It appears you are not in the middle of a cherrybase!?")
+  end
+  
   it "should create the cherrybase temp file with the given branch's last commit" do
     @file_util.should_receive(:git_repo?).and_return(true)
     @file_util.should_receive(:temp_file?).and_return(false)

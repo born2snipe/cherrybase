@@ -25,7 +25,7 @@ describe Cherrybase::Executor do
   end
 
   it "should tell the baser to continue to the next commit" do
-    @baser.should_receive(:continue)
+    @baser.should_receive(:continue).with(true)
     @executor.execute(['--continue'])
   end
   

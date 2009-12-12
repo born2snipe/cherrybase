@@ -11,7 +11,7 @@ module Cherrybase
       begin
         input = Cherrybase::Args.new().parse(args)
         if (input['continue'])
-          @baser.continue
+          @baser.continue(true)
         else
           if (input['abort'])
             @baser.abort

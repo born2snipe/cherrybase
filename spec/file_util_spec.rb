@@ -8,15 +8,34 @@ describe Cherrybase::FileUtil do
     @file_util = Cherrybase::FileUtil.new
   end
   
+  it "should delete the temp file" do
+    test_project = File.join(@fixtures_dir, 'cherrybase-inprogress')
+    @file_util.write_temp_file("starting-commit", "next-commit", ["commit1", "commit2"], test_project)
+    
+    @file_util.delete_temp_file(test_project)
+    @file_util.temp_file?(test_project).should == false
+  end
+  
+  it "should read the temp file" do
+    test_project = File.join(@fixtures_dir, 'cherrybase-inprogress')
+    @file_util.write_temp_file("starting-commit", "next-commit", ["commit1", "commit2"], test_project)
+    @file_util.read_temp_file(test_project).should == {
+      "starting_commit" => "starting-commit",
+      "next_cherrypick" => "next-commit",
+      "commits" => ["commit1", "commit2"]
+    }
+  end
+  
   it "should return nil if the temp file does not exist in the .git folder" do
     expected_tempfile = File.join(File.join(@project, '.git'), 'cherrybase')
-    @file_util.temp_file(@project).should == expected_tempfile
+    @file_util.temp_file?(@project).should == false
   end
   
   it "should find the temp file if it exists in the .git folder" do
     test_project = File.join(@fixtures_dir, 'cherrybase-inprogress')
+    @file_util.write_temp_file("starting-commit", "next-commit", ["commit1", "commit2"], test_project)
     expected_tempfile = File.join(File.join(test_project, '.git'), 'cherrybase')
-    @file_util.temp_file(test_project).should == expected_tempfile
+    @file_util.temp_file?(test_project).should == true
   end
 
   it "should recursively look up the directory tree and return the project directory" do

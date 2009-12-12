@@ -19,29 +19,46 @@ module Cherrybase
       @file_util.write_temp_file(starting_commit, starting_commit, commits)
     end
     
-    def continue()
+    def continue(commit_previous_hash = false)
+      raise "It appears you are not in the middle of a cherrybase!?" if !@file_util.temp_file?
+      
+      temp_data = @file_util.read_temp_file()
+      commits = temp_data['commits']
+      next_cherrypick = temp_data['next_cherrypick']
+      
+      if commit_previous_hash
+        @git.commit(commits[commits.index(next_cherrypick) - 1])
+      end
+      
+      conflicts_found = false
+      last_commit_applied = nil
+      i = commits.index(next_cherrypick)
+      
+      while i < commits.length
+        last_commit_applied = commits[i]
+        @git.cherry_pick(last_commit_applied)
+        if @git.has_conflicts?
+          conflicts_found = true
+          break
+        end
+        i += 1
+      end
+      
+      if conflicts_found
+        @git.status
+        if (last_commit_applied == commits.last)
+          @file_util.delete_temp_file()
+        else
+          @file_util.write_temp_file(temp_data['starting_commit'], commits.last, commits)
+        end
+      else
+        @file_util.delete_temp_file()
+      end
+      
     end
     
     def abort()
     end
-    
-    def x(branch_name, starting_commit, ending_commit)
-      raise "Could not locate .git folder! Is this a Git repository?" if !@file_util.git_repo?
-      
-      @root_git_dir = @file_util.git_root_dir()
-      temp_file_info = @file_util.temp_file()
-      if temp_file_info
-        @initial_commit = temp_file_info['initial_commit']
-        @commits_to_cherrypick = temp_file_info['commits_to_cherrypick']
-        @next_cherrypick = temp_file_info['next_cherrypick']
-      else
-        @initial_commit = @git.last_svn_commit()
-        @commits_to_cherrypick = @git.commits_to_cherrypick()
-        @next_cherrypick = @commits_to_cherrypick[0]
-        @file_util.write_temp_file(@root_git_dir, @initial_commit, @next_cherrypick, @commits_to_cherrypick)
-      end
-    end
-    
     
   end
 end

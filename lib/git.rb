@@ -6,10 +6,6 @@ module Cherrybase
       @cmd = cmd
     end
     
-    def unstaged_files?()
-      false
-    end
-    
     def reset(commit_hash)
       @cmd.run("git reset --hard #{commit_hash}")
     end

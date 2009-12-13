@@ -35,7 +35,7 @@ module Cherrybase
       next_cherrypick = temp_data['next_cherrypick']
       
       if commit_previous_hash
-        raise "Please stage all your changes before trying to --continue" if @git.unstaged_files?
+        raise "Please stage all your changes before trying to --continue" if @git.has_conflicts?
         commit_hash = commits[commits.index(next_cherrypick) - 1]
         @git.commit(commit_hash)
       end

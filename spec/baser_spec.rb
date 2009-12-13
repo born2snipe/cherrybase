@@ -12,7 +12,7 @@ describe Cherrybase::Baser do
   it "should raise an error if your try to continue with changes that are unstaged" do
     @file_util.should_receive(:temp_file?).and_return(true)
     @file_util.should_receive(:read_temp_file).and_return({})
-    @git.stub!(:unstaged_files?).and_return(true)
+    @git.stub!(:has_conflicts?).and_return(true)
     
     lambda {
       @baser.continue(true)
@@ -85,7 +85,7 @@ describe Cherrybase::Baser do
     @git.should_receive(:cherry_pick).with("commit1")
     @git.should_receive(:has_conflicts?).and_return(false)
     @file_util.should_receive(:delete_temp_file)
-    @git.stub!(:unstaged_files?).and_return(false)
+    @git.stub!(:has_conflicts?).and_return(false)
     
     @baser.continue(true)
   end

@@ -90,6 +90,20 @@ describe Cherrybase::Baser do
     @baser.continue(true)
   end
   
+  it "should handle if the last commit had a conflict and you continue with committing" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({
+      "starting_commit" => "start",
+      "next_cherrypick" => nil,
+      "commits" => ["start", "commit1"]
+    })
+    @git.should_receive(:has_conflicts?).and_return(false)
+    @git.should_receive(:commit).with("commit1")
+    @file_util.should_receive(:delete_temp_file)
+    
+    @baser.continue(true)
+  end
+  
   it "should start apply commits based on the next_cherrypick" do
     @file_util.should_receive(:temp_file?).and_return(true)
     @file_util.should_receive(:read_temp_file).and_return({

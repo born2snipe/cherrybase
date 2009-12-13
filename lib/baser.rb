@@ -36,23 +36,28 @@ module Cherrybase
       
       if commit_previous_hash
         raise "Please stage all your changes before trying to --continue" if @git.has_conflicts?
-        commit_hash = commits[commits.index(next_cherrypick) - 1]
+        commit_hash = commits.last
+        if next_cherrypick
+          commit_hash = commits[commits.index(next_cherrypick) - 1]
+        end
         @git.commit(commit_hash)
       end
       
-      conflicts_found = false
-      last_commit_applied = nil
-      i = commits.index(next_cherrypick)
+      if next_cherrypick
+        conflicts_found = false
+        last_commit_applied = nil
+        i = commits.index(next_cherrypick)
       
-      while i < commits.length
-        puts "Applying #{i+1} of #{commits.length} cherry-picks" 
-        last_commit_applied = commits[i]
-        @git.cherry_pick(last_commit_applied)
-        if @git.has_conflicts?
-          conflicts_found = true
-          break
+        while i < commits.length
+          puts "Applying #{i+1} of #{commits.length} cherry-picks" 
+          last_commit_applied = commits[i]
+          @git.cherry_pick(last_commit_applied)
+          if @git.has_conflicts?
+            conflicts_found = true
+            break
+          end
+          i += 1
         end
-        i += 1
       end
       
       if conflicts_found

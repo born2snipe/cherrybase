@@ -9,6 +9,16 @@ describe Cherrybase::Baser do
     @baser = Cherrybase::Baser.new(@git, @file_util)
   end
   
+  it "should raise an error if your try to continue with changes that are unstaged" do
+    @file_util.should_receive(:temp_file?).and_return(true)
+    @file_util.should_receive(:read_temp_file).and_return({})
+    @git.stub!(:unstaged_files?).and_return(true)
+    
+    lambda {
+      @baser.continue(true)
+    }.should raise_error(RuntimeError, "Please stage all your changes before trying to --continue")
+  end
+  
   it "should reset HEAD back to the last original commit before any cherry-picks" do
     @file_util.stub!(:temp_file?).and_return(true)
     @file_util.stub!(:read_temp_file).and_return({"starting_commit" => "start"})
@@ -57,6 +67,7 @@ describe Cherrybase::Baser do
     @file_util.should_receive(:git_repo?).and_return(true)
     @file_util.should_receive(:temp_file?).and_return(false)
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+
     lambda {
       @git.should_receive(:has_commit?).with(BRANCH, "doesNotExist").and_return(false)
       @baser.init(BRANCH, "doesNotExist", nil)
@@ -74,6 +85,7 @@ describe Cherrybase::Baser do
     @git.should_receive(:cherry_pick).with("commit1")
     @git.should_receive(:has_conflicts?).and_return(false)
     @file_util.should_receive(:delete_temp_file)
+    @git.stub!(:unstaged_files?).and_return(false)
     
     @baser.continue(true)
   end
@@ -92,22 +104,23 @@ describe Cherrybase::Baser do
     @baser.continue
   end
   
-  it "should cleanup the temp file if a conflict is encountered on the last commit" do
+  it "should stop cherrypicking if a conflict is found, with multiple commits left" do
     @file_util.should_receive(:temp_file?).and_return(true)
     @file_util.should_receive(:read_temp_file).and_return({
       "starting_commit" => "start",
       "next_cherrypick" => "start",
-      "commits" => ["start"]
+      "commits" => ["start", "middle", "end"]
     })
     @git.should_receive(:cherry_pick).with("start")
     @git.should_receive(:has_conflicts?).and_return(true)
     @git.should_receive(:status)
-    @file_util.should_receive(:delete_temp_file)
+    @file_util.should_receive(:write_temp_file).with("start", "middle", ["start", "middle", "end"])
     
     @baser.continue
   end
   
-  it "should stop cherrypicking if a conflict is found" do
+  
+  it "should stop cherrypicking if a conflict is found, only one commit left" do
     @file_util.should_receive(:temp_file?).and_return(true)
     @file_util.should_receive(:read_temp_file).and_return({
       "starting_commit" => "start",

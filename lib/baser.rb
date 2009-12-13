@@ -35,7 +35,9 @@ module Cherrybase
       next_cherrypick = temp_data['next_cherrypick']
       
       if commit_previous_hash
-        @git.commit(commits[commits.index(next_cherrypick) - 1])
+        raise "Please stage all your changes before trying to --continue" if @git.unstaged_files?
+        commit_hash = commits[commits.index(next_cherrypick) - 1]
+        @git.commit(commit_hash)
       end
       
       conflicts_found = false
@@ -43,7 +45,7 @@ module Cherrybase
       i = commits.index(next_cherrypick)
       
       while i < commits.length
-        puts "Applying #{i+1} of #{commits.length} cherry-picks\r" 
+        puts "Applying #{i+1} of #{commits.length} cherry-picks" 
         last_commit_applied = commits[i]
         @git.cherry_pick(last_commit_applied)
         if @git.has_conflicts?
@@ -56,15 +58,11 @@ module Cherrybase
       if conflicts_found
         puts "Conflict(s) Encountered!"
         @git.status
-        if (last_commit_applied == commits.last)
-          @file_util.delete_temp_file()
-        else
-          @file_util.write_temp_file(temp_data['starting_commit'], commits.last, commits)
-        end
+        @file_util.write_temp_file(temp_data['starting_commit'], commits[i+1], commits)
       else
         @file_util.delete_temp_file()
+        puts "Cherrybase completed!"
       end
-      puts "Cherrybase completed!"
     end
     
     def abort()

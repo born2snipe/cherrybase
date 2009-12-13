@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["born2snipe"]
-  s.date = %q{2009-12-12}
+  s.date = %q{2009-12-13}
   s.default_executable = %q{cherrybase}
   s.description = %q{Ruby gem to cherry-pick a range of commits with similar rebase options}
   s.email = %q{born2snipe@gmail.com}
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "bin/cherrybase",
+     "cherrybase.gemspec",
      "lib/args.rb",
      "lib/baser.rb",
      "lib/cmd.rb",

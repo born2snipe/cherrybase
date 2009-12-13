@@ -7,6 +7,14 @@ describe Cherrybase::Git do
     @git = Cherrybase::Git.new(@cmd)
   end
   
+  it "should raise an error if another commit is found with the given has while resolving the commit" do
+    @cmd.stub!(:run).with("git log branch --pretty=oneline").and_return(["1234567", "123456"])
+    
+    lambda {
+      @git.resolve_commit("branch", "12345")
+    }.should raise_error(RuntimeError, "Ambigous hash commit found! Please supply more of the commit hash (12345)")
+  end
+  
   it "should reset the HEAD to the given commit" do
     @cmd.should_receive(:run).with("git reset --hard commit")
     

@@ -6,6 +6,10 @@ module Cherrybase
       @cmd = cmd
     end
     
+    def unstaged_files?()
+      false
+    end
+    
     def reset(commit_hash)
       @cmd.run("git reset --hard #{commit_hash}")
     end
@@ -17,13 +21,17 @@ module Cherrybase
     def resolve_commit(branch_name, commit_hash)
       if commit_hash
         raise "Please supply at least 5 characters for a commit hash" if commit_hash.length < 5
+        match = nil
         @cmd.run("git log #{branch_name} --pretty=oneline").each do |line|
           if line == commit_hash || line.include?(commit_hash)
-            return line.split(' ')[0]
+            raise "Ambigous hash commit found! Please supply more of the commit hash (#{commit_hash})" if match
+            match = line.split(' ')[0]
           end
         end
+        match
+      else
+        nil
       end
-      nil
     end
     
     def last_commit(branch_name)

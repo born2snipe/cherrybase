@@ -133,9 +133,9 @@ describe Cherrybase::Git do
       ""
     ]
     
-    @cmd.stub!(:run).and_return(log_lines)
+    @cmd.stub!(:run).with("git log branch").and_return(log_lines)
     
-    @git.last_svn_commit.should == nil
+    @git.last_svn_commit("branch").should == nil
   end
   
   it "should find the last svn commit hash" do
@@ -156,9 +156,9 @@ describe Cherrybase::Git do
       ""
     ]
     
-    @cmd.stub!(:run).and_return(log_lines)
+    @cmd.stub!(:run).with("git log branch").and_return(log_lines)
     
-    @git.last_svn_commit.should == "hash2"
+    @git.last_svn_commit("branch").should == "hash2"
   end
   
 end

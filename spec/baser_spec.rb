@@ -7,6 +7,37 @@ describe Cherrybase::Baser do
     @git = mock("git")
     @file_util = mock("file_util")
     @baser = Cherrybase::Baser.new(@git, @file_util)
+    
+    @first_commit = "commit1"
+    @commits = ["commit1", "commit2"]
+  end
+  
+  it "should not care about case of the SVN given" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @git.should_receive(:last_svn_commit).with(BRANCH).and_return('svn_commit')
+    @git.should_receive(:last_commit).with(BRANCH).and_return('last_commit')
+    @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'svn_commit', 'last_commit').and_return(['svn', 'commit1', 'commit2'])
+    @git.stub!(:current_branch).and_return("current")
+    @git.stub!(:last_commit).with("current").and_return("last_original_commit")
+    @file_util.should_receive(:write_temp_file).with('last_original_commit', @first_commit, @commits)
+    
+    @baser.init(BRANCH, "SvN", nil)
+  end
+  
+  it "should find the commit after the last svn commit and use it as the starting commit" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @git.should_receive(:last_svn_commit).with(BRANCH).and_return('svn_commit')
+    @git.should_receive(:last_commit).with(BRANCH).and_return('last_commit')
+    @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'svn_commit', 'last_commit').and_return(['svn', 'commit1', 'commit2'])
+    @git.stub!(:current_branch).and_return("current")
+    @git.stub!(:last_commit).with("current").and_return("last_original_commit")
+    @file_util.should_receive(:write_temp_file).with('last_original_commit', @first_commit, @commits)
+    
+    @baser.init(BRANCH, "svn", nil)
   end
   
   it "should raise an error if your try to continue with changes that are unstaged" do
@@ -42,10 +73,10 @@ describe Cherrybase::Baser do
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
     @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
     @git.should_receive(:has_commit?).with(BRANCH, 'end-commit').and_return(true)
-    @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'first_commit', 'last_commit').and_return(['commits-to-cherrypick'])
-    @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return("first_commit")
+    @git.should_receive(:commits_to_cherrypick).with(BRANCH, @first_commit, 'last_commit').and_return(@commits)
+    @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return(@first_commit)
     @git.stub!(:resolve_commit).with(BRANCH, "end-commit").and_return("last_commit")
-    @file_util.should_receive(:write_temp_file).with('last_original_commit', 'first_commit', ['commits-to-cherrypick'])
+    @file_util.should_receive(:write_temp_file).with('last_original_commit', @first_commit, @commits)
     @git.stub!(:current_branch).and_return("current")
     @git.stub!(:last_commit).with("current").and_return("last_original_commit")
     
@@ -193,11 +224,11 @@ describe Cherrybase::Baser do
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
     @git.should_receive(:last_commit).with(BRANCH).and_return('last-commit')
     @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
-    @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'first_commit', 'last-commit').and_return(['commits-to-cherrypick'])
-    @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return("first_commit")
+    @git.should_receive(:commits_to_cherrypick).with(BRANCH, @first_commit, 'last-commit').and_return(@commits)
+    @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return(@first_commit)
     @git.stub!(:current_branch).and_return("current")
     @git.stub!(:last_commit).with("current").and_return("last_original_commit")
-    @file_util.should_receive(:write_temp_file).with('last_original_commit', 'first_commit', ['commits-to-cherrypick'])
+    @file_util.should_receive(:write_temp_file).with('last_original_commit', @first_commit, @commits)
     @baser.init(BRANCH, 'starting-commit', nil)
   end
   

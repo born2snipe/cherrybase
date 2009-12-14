@@ -100,10 +100,10 @@ module Cherrybase
      commits.reverse
     end
     
-    def last_svn_commit()
+    def last_svn_commit(branch_name)
       last_commit_hash = nil
       svn_commit_found = false
-      @cmd.run("git log").each do |line|
+      @cmd.run("git log #{branch_name}").each do |line|
         if line.include?("git-svn-id")
           svn_commit_found = true
           break

@@ -11,6 +11,14 @@ This will attempt to cherry-pick from the <first-commit> all the way to <last-co
 
 	cherrybase <branch> <first-commit>..<last-commit>
 	
+This will attempt to cherry-pick from the commit just after the last svn commit from the <branch>
+
+	cherrybase <branch> svn
+	
+This will attempt to cherry-pick from the commit just after the last svn commit all the way to the <last-commit> from the <branch>
+
+	cherrybase <branch> svn..<last-commit>
+	
 
 If you encounter a merge conflict you should be able to handle this similar to how you would a 'git rebase'. You make the changes as needed and stage the changes for commit. You now have two choices just like with rebasing '--continue' or '--abort'.
 

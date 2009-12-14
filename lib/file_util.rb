@@ -2,13 +2,18 @@ require 'yaml'
 
 module Cherrybase
   class FileUtil
+    
+    def initialize(git_directory_name = '.git')
+      @git_dir_name = git_directory_name
+    end
+    
     def git_repo?(directory = File.expand_path('.'))
       git_root_dir(directory) != nil
     end
     
     def git_root_dir(directory = File.expand_path('.'))
       current_directory = directory  
-      while !File.exists?(File.join(current_directory, '.git'))
+      while !File.exists?(File.join(current_directory, @git_dir_name))
         current_directory = File.dirname(current_directory)
       end
       current_directory
@@ -19,7 +24,7 @@ module Cherrybase
     end
     
     def temp_file(directory = File.expand_path('.'))
-      File.join(File.join(git_root_dir(directory), '.git'), 'cherrybase')
+      File.join(File.join(git_root_dir(directory), @git_dir_name), 'cherrybase')
     end
     
     def delete_temp_file(directory = File.expand_path('.'))

@@ -5,7 +5,8 @@ describe Cherrybase::FileUtil do
   before(:each) do
     @fixtures_dir = File.expand_path(File.join(File.join(__FILE__, ".."), ".."), "fixtures")
     @project = File.join(File.join(@fixtures_dir, "project"))
-    @file_util = Cherrybase::FileUtil.new
+    @git_dir_name = 'git_dir'
+    @file_util = Cherrybase::FileUtil.new(@git_dir_name)
   end
   
   it "should delete the temp file" do
@@ -27,14 +28,14 @@ describe Cherrybase::FileUtil do
   end
   
   it "should return nil if the temp file does not exist in the .git folder" do
-    expected_tempfile = File.join(File.join(@project, '.git'), 'cherrybase')
+    expected_tempfile = File.join(File.join(@project, @git_dir_name), 'cherrybase')
     @file_util.temp_file?(@project).should == false
   end
   
   it "should find the temp file if it exists in the .git folder" do
     test_project = File.join(@fixtures_dir, 'cherrybase-inprogress')
     @file_util.write_temp_file("starting-commit", "next-commit", ["commit1", "commit2"], test_project)
-    expected_tempfile = File.join(File.join(test_project, '.git'), 'cherrybase')
+    expected_tempfile = File.join(File.join(test_project, @git_dir_name), 'cherrybase')
     @file_util.temp_file?(test_project).should == true
   end
 

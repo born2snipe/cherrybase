@@ -75,19 +75,18 @@ describe Cherrybase::Git do
   end
   
   it "should return false if no files are marked as unmerged" do
-    @cmd.should_receive(:run).with("git ls-files -tu").and_return([])
+    @cmd.should_receive(:run).with("git status").and_return([])
     
     @git.has_conflicts?().should == false
   end
   
   it "should return true if files are marked as unmerged" do
     log_lines = [
-      "M 100644 e01079f2c38b76cf43780a2899c3f5bd2f50b3a7 1	readme.txt",
-      "M 100644 f7b5ff223f06fb323463b81b08759cf13678fd27 2	readme.txt",
-      "M 100644 0ebe257230ddb66e12610ad9b304c7605b61dfeb 3	readme.txt"
+      "# On branch test",
+      "# Unmerged paths:"
     ]
     
-    @cmd.should_receive(:run).with("git ls-files -tu").and_return(log_lines)
+    @cmd.should_receive(:run).with("git status").and_return(log_lines)
     
     @git.has_conflicts?().should == true
   end

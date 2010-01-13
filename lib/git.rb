@@ -44,7 +44,12 @@ module Cherrybase
     end
     
     def has_conflicts?()
-      @cmd.run("git ls-files -tu").length > 0
+      @cmd.run("git status").each do |line|
+        if (line.include?("Unmerged paths:"))
+          return true
+        end
+      end
+      false
     end
     
     def commit(commit_hash)

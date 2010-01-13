@@ -146,7 +146,7 @@ describe Cherrybase::Git do
       "",
       " comment-1",
       "",
-      "commit hash2",
+      "commit hash2\n",
       "Author: author-2",
       "Date: date-2",
       "",

@@ -109,7 +109,7 @@ module Cherrybase
           break
         else
           if line =~ /commit [a-z0-9]+$/
-            last_commit_hash = line[7,line.length]
+            last_commit_hash = line[7,line.length].strip
           end
         end
       end

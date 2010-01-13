@@ -1,5 +1,6 @@
 require 'git'
 require 'file_util'
+require 'validator'
 
 module Cherrybase
   class Baser
@@ -26,7 +27,7 @@ module Cherrybase
       else
         last_commit = @git.last_commit(branch_name)
       end
-      
+
       commits = @git.commits_to_cherrypick(branch_name, first_commit, last_commit)
       
       if (use_svn_commit)

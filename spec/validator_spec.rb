@@ -19,6 +19,17 @@ describe Cherrybase::Validator do
     @validator.validate_init(BRANCH, "start-commit", "end-commit", nil)
   end
 
+  it "should raise an error if the last SVN commit could not be found" do
+    @file_util.should_receive(:git_repo?).and_return(true)
+    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:last_svn_commit).with(BRANCH).and_return(nil)
+
+    lambda {
+      @validator.validate_init(BRANCH, nil, nil, true)
+    }.should raise_error(RuntimeError, "Could not locate the last SVN commit in branch (#{BRANCH})")
+  end
+
   it "should raise an error if the given ending commit can not be found for the given branch" do
     @file_util.should_receive(:git_repo?).and_return(true)
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
@@ -36,6 +47,7 @@ describe Cherrybase::Validator do
     @file_util.should_receive(:git_repo?).and_return(true)
     @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
     @file_util.should_receive(:temp_file?).and_return(false)
+    @git.should_receive(:last_svn_commit).with(BRANCH).and_return("last-svn-commit")
 
     @validator.validate_init(BRANCH, nil, nil, true)
   end

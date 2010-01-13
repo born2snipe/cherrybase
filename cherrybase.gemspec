@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cherrybase}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["born2snipe"]
-  s.date = %q{2009-12-14}
+  s.date = %q{2010-01-12}
   s.default_executable = %q{cherrybase}
   s.description = %q{Ruby gem to cherry-pick a range of commits with similar rebase options}
   s.email = %q{born2snipe@gmail.com}
@@ -36,13 +36,15 @@ Gem::Specification.new do |s|
      "lib/executor.rb",
      "lib/file_util.rb",
      "lib/git.rb",
+     "lib/validator.rb",
      "spec/args_spec.rb",
      "spec/baser_spec.rb",
      "spec/executor_spec.rb",
      "spec/file_util_spec.rb",
      "spec/git_spec.rb",
      "spec/spec.opts",
-     "spec/spec_helper.rb"
+     "spec/spec_helper.rb",
+     "spec/validator_spec.rb"
   ]
   s.homepage = %q{http://github.com/born2snipe/cherrybase}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -55,7 +57,8 @@ Gem::Specification.new do |s|
      "spec/executor_spec.rb",
      "spec/file_util_spec.rb",
      "spec/git_spec.rb",
-     "spec/spec_helper.rb"
+     "spec/spec_helper.rb",
+     "spec/validator_spec.rb"
   ]
 
   if s.respond_to? :specification_version then

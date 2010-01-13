@@ -31,14 +31,14 @@ module Cherrybase
     end
     
     def showUsage() 
-      puts "Usage: cherrybase [<branch> [<commit> | <commit>..<commit>]] | --continue | --abort"
+      puts "Usage: cherrybase [<branch> [<commit> | <commit>..<commit> | svn | svn..<commit>]] | --continue | --abort"
     end
     
     def showHelp()
         puts "NAME"
         puts "\tcherrybase - cherry-pick a range of commits from one branch to the current branch"
         puts "SYNOPSIS"
-        puts "\tcherrybase [<branch> [<commit> | <commit>..<commit> | svn | svn..<commit>]] | --continue | --abort"
+        puts "\tshowUsage()"
         puts "DESCRIPTION"
         puts "\tThe idea is to cherry-pick across multiple commits and have similar functionality as the rebase command."
     end

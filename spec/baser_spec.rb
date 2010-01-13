@@ -6,16 +6,15 @@ describe Cherrybase::Baser do
   before(:each) do
     @git = mock("git")
     @file_util = mock("file_util")
-    @baser = Cherrybase::Baser.new(@git, @file_util)
+    @validator = mock("validator")
+    @baser = Cherrybase::Baser.new(@git, @file_util, @validator)
     
     @first_commit = "commit1"
     @commits = ["commit1", "commit2"]
   end
   
   it "should not care about case of the SVN given" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:temp_file?).and_return(false)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @validator.should_receive(:validate_init)
     @git.should_receive(:last_svn_commit).with(BRANCH).and_return('svn_commit')
     @git.should_receive(:last_commit).with(BRANCH).and_return('last_commit')
     @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'svn_commit', 'last_commit').and_return(['svn', 'commit1', 'commit2'])
@@ -27,9 +26,7 @@ describe Cherrybase::Baser do
   end
   
   it "should find the commit after the last svn commit and use it as the starting commit" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:temp_file?).and_return(false)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @validator.should_receive(:validate_init)
     @git.should_receive(:last_svn_commit).with(BRANCH).and_return('svn_commit')
     @git.should_receive(:last_commit).with(BRANCH).and_return('last_commit')
     @git.should_receive(:commits_to_cherrypick).with(BRANCH, 'svn_commit', 'last_commit').and_return(['svn', 'commit1', 'commit2'])
@@ -68,11 +65,7 @@ describe Cherrybase::Baser do
   end
   
   it "should use the end commit if given" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:temp_file?).and_return(false)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
-    @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
-    @git.should_receive(:has_commit?).with(BRANCH, 'end-commit').and_return(true)
+    @validator.should_receive(:validate_init)
     @git.should_receive(:commits_to_cherrypick).with(BRANCH, @first_commit, 'last_commit').and_return(@commits)
     @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return(@first_commit)
     @git.stub!(:resolve_commit).with(BRANCH, "end-commit").and_return("last_commit")
@@ -81,28 +74,6 @@ describe Cherrybase::Baser do
     @git.stub!(:last_commit).with("current").and_return("last_original_commit")
     
     @baser.init(BRANCH, 'starting-commit', "end-commit")
-  end
-  
-  it "should raise an error if the end commit could not be located in the history" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:temp_file?).and_return(false)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
-    @git.should_receive(:has_commit?).with(BRANCH, "start").and_return(true)
-    @git.should_receive(:has_commit?).with(BRANCH, "end").and_return(false)
-    lambda {
-      @baser.init(BRANCH, "start", "end")
-    }.should raise_error(RuntimeError, "Could not locate END hash (end) in the Git repository history")
-  end
-  
-  it "should raise an error if the start commit could not be located in the history" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:temp_file?).and_return(false)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
-
-    lambda {
-      @git.should_receive(:has_commit?).with(BRANCH, "doesNotExist").and_return(false)
-      @baser.init(BRANCH, "doesNotExist", nil)
-    }.should raise_error(RuntimeError, "Could not locate START hash (doesNotExist) in the Git repository history")
   end
   
   it "should commit staged merge resolution" do
@@ -219,41 +190,14 @@ describe Cherrybase::Baser do
   end
   
   it "should create the cherrybase temp file with the given branch's last commit" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @file_util.should_receive(:temp_file?).and_return(false)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
+    @validator.should_receive(:validate_init)
     @git.should_receive(:last_commit).with(BRANCH).and_return('last-commit')
-    @git.should_receive(:has_commit?).with(BRANCH, 'starting-commit').and_return(true)
     @git.should_receive(:commits_to_cherrypick).with(BRANCH, @first_commit, 'last-commit').and_return(@commits)
     @git.stub!(:resolve_commit).with(BRANCH, "starting-commit").and_return(@first_commit)
     @git.stub!(:current_branch).and_return("current")
     @git.stub!(:last_commit).with("current").and_return("last_original_commit")
     @file_util.should_receive(:write_temp_file).with('last_original_commit', @first_commit, @commits)
     @baser.init(BRANCH, 'starting-commit', nil)
-  end
-  
-  it "should throw an error if the given branch name does not exist in the repository" do
-    lambda {
-      @file_util.should_receive(:git_repo?).and_return(true)
-      @git.should_receive(:has_branch?).with(BRANCH).and_return(false)
-      @baser.init(BRANCH, nil, nil)
-    }.should raise_error(RuntimeError, "Could not find branch (branch-name) in the Git repository")
-  end
-  
-  it "should throw an exception if the git repo folder could not be discovered" do
-    lambda {
-      @file_util.should_receive(:git_repo?).and_return(false)
-      @baser.init(nil, nil, nil)
-    }.should raise_error(RuntimeError, "Could not locate .git folder! Is this a Git repository?")
-  end
-  
-  it "should throw an error if you already in the middle of a cherrybase" do
-    @file_util.should_receive(:git_repo?).and_return(true)
-    @git.should_receive(:has_branch?).with(BRANCH).and_return(true)
-    lambda {
-      @file_util.should_receive(:temp_file?).and_return(true)
-      @baser.init("branch-name", nil, nil)
-    }.should raise_error(RuntimeError, "It appears you are already in the middle of a cherrybase!?")
   end
   
 end

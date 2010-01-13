@@ -5,6 +5,7 @@ require 'baser'
 require 'file_util'
 require 'args'
 require 'executor'
+require 'validator'
 
 require 'spec'
 require 'spec/autorun'
